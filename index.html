@@ -14,12 +14,29 @@
             background-color: #f4f4f4;
         }
         header {
-            background-color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 60px 20px;
             text-align: center;
             border-radius: 5px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            border-radius: 5px;
+            opacity: 0.3;
+        }
+        header h1, header p {
+            position: relative;
+            z-index: 1;
         }
         main {
             background-color: white;
@@ -89,8 +106,8 @@
         <ul>
             <li><a href="https://garrysblog.github.io/rgb565-converter.html">Use the converter</a></li>
             <li><a href="https://github.com/garrysblog/Image-to-RGB565-converter">Repository and read me file</a></li>
-            <li>Blog post about <a href="https://garrysblog.com/2025/11/11/i-asked-claude-for-info-and-it-built-a-standalone-tool/"></a> creating the file</li>
-            <li>Blog post about <a href="https://garrysblog.com/2025/11/13/animating-a-blinking-eye-on-an-arduino-powered-lcd-display/"></a> using it in a blinking eye project</li>
+            <li>Blog post about <a href="https://garrysblog.com/2025/11/11/i-asked-claude-for-info-and-it-built-a-standalone-tool/">creating the file</a></li>
+            <li>Blog post about <a href="https://garrysblog.com/2025/11/13/animating-a-blinking-eye-on-an-arduino-powered-lcd-display/">using it in a blinking eye project</a></li>
         </ul>
     </main>
     
