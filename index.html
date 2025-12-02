@@ -54,7 +54,7 @@
 </head>
 <body>
     <header>
-        <h1>Welcome to Garry's Github/h1>
+        <h1>Welcome to Garry's Github</h1>
         <p>Hosted on GitHub Pages</p>
     </header>
     
@@ -72,13 +72,25 @@
         </nav>
         -->
         
-        <h3>Getting Started</h3>
-        <p>To customize this page:</p>
+        <h3>Image to RGB565 Array Converter for Arduino</h3>
+        <h4>Overview</h4>
+        <p>This converter transforms regular image files (PNG, JPG, GIF, etc.) into C/C++ arrays that Arduino can store in flash memory and display on RGB565 LCD screens.</p>
+
+        <h4>What It Does</h4>
+        <p>The converter performs the following operations:</p>
         <ul>
-            <li><a href="https://garrysblog.github.io/rgb565-converter.html">Image to RGB565 Array Converter for Arduino</a></li>
-            <li>Modify the styles in the CSS section</li>
-            <li>Create additional pages and link to them</li>
-            <li>Add images, videos, or other media</li>
+            <li>Reads your image - Accepts any common format (PNG, JPG, GIF, BMP)</li>
+            <li>Extracts pixel data - Gets the color value of every pixel</li>
+            <li>Converts colors - Transforms from RGB888 (24-bit) to RGB565 (16-bit)</li>
+            <li>Generates C code - Creates a properly formatted C array with hex values</li>
+            <li>Outputs a header file - Produces a .h file ready to include in Arduino projects</li>
+        </ul>
+        <h4>Links</h4>
+        <ul>
+            <li><a href="https://garrysblog.github.io/rgb565-converter.html">Use the converter</a></li>
+            <li><a href="https://github.com/garrysblog/Image-to-RGB565-converter">Repository and read me file/a></li>
+            <li><a href="https://garrysblog.com/2025/11/11/i-asked-claude-for-info-and-it-built-a-standalone-tool/">Blog post</a> about creating the file</li>
+            <li><a href="https://garrysblog.com/2025/11/13/animating-a-blinking-eye-on-an-arduino-powered-lcd-display/">Blog post</a> about using it in a blinking eye project</li>
         </ul>
     </main>
     
