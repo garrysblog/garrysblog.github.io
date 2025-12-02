@@ -1,3 +1,3 @@
 # garrysblog.github.io
 
-Welcome to my repository
+Welcome to my repositories
