@@ -3,220 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caesar Cipher Tool</title>
+    <title>My GitHub Pages Site</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
         }
-        
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 700px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
             text-align: center;
-            font-size: 2em;
-        }
-        
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 0.9em;
-        }
-        
-        .text-group {
+            border-radius: 5px;
             margin-bottom: 20px;
         }
-        
-        label {
-            display: block;
-            color: #555;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95em;
+        main {
+            background-color: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-            transition: border-color 0.3s;
+        nav {
+            margin: 20px 0;
         }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
+        nav a {
+            display: inline-block;
+            margin-right: 15px;
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            transition: background-color 0.3s;
         }
-        
-        #inputText {
-            min-height: 120px;
-        }
-        
-        #outputText {
-            min-height: 120px;
-            background-color: #f8f9fa;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin: 25px 0;
-        }
-        
-        button {
-            flex: 1;
-            padding: 14px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        #prevBtn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        nav a:hover {
+            background-color: #333;
             color: white;
         }
-        
-        #prevBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
-        }
-        
-        #nextBtn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        #nextBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .info {
+        footer {
             text-align: center;
-            color: #888;
-            font-size: 0.85em;
-            margin-top: 20px;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 Caesar Cipher</h1>
-        <p class="subtitle">Encrypt your text with a simple shift cipher</p>
-        
-        <div class="text-group">
-            <label for="inputText">Input Text:</label>
-            <textarea id="inputText" placeholder="Paste or type your text here..."></textarea>
-        </div>
-        
-        <div class="button-group">
-            <button id="prevBtn">← Previous (Shift -1)</button>
-            <button id="nextBtn">Next (Shift +1) →</button>
-        </div>
-        
-        <div class="text-group">
-            <label for="outputText">Output Text:</label>
-            <textarea id="outputText" readonly placeholder="Encrypted text will appear here..."></textarea>
-        </div>
-        
-        <p class="info" id="shiftInfo">The Caesar cipher shifts each letter by one position in the alphabet</p>
-    </div>
+    <header>
+        <h1>Welcome to Garry's Github/h1>
+        <p>Hosted on GitHub Pages</p>
+    </header>
+    
+    <main>
+        <h2>About This Site</h2>
+        <p>This is a simple index page for my GitHub Pages website.</p>
 
-    <script>
-        const inputText = document.getElementById('inputText');
-        const outputText = document.getElementById('outputText');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const shiftInfo = document.getElementById('shiftInfo');
+        <!--
+        <nav>
+            <h3>Navigation</h3>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="projects.html">Projects</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+        -->
         
-        let currentShift = 0;
-        
-        function updateShiftDisplay() {
-            if (currentShift === 0) {
-                shiftInfo.textContent = 'The Caesar cipher shifts each letter by one position in the alphabet';
-            } else {
-                const direction = currentShift > 0 ? 'forward' : 'backward';
-                shiftInfo.textContent = `Current shift: ${Math.abs(currentShift)} position${Math.abs(currentShift) !== 1 ? 's' : ''} ${direction} from original`;
-            }
-        }
-        
-        inputText.addEventListener('input', () => {
-            currentShift = 0;
-            outputText.value = '';
-            updateShiftDisplay();
-        });
-        
-        function caesarCipher(text, shift) {
-            let result = '';
-            
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                
-                if (char.match(/[a-z]/i)) {
-                    const code = text.charCodeAt(i);
-                    
-                    // Uppercase letters
-                    if (code >= 65 && code <= 90) {
-                        char = String.fromCharCode(((code - 65 + shift + 26) % 26) + 65);
-                    }
-                    // Lowercase letters
-                    else if (code >= 97 && code <= 122) {
-                        char = String.fromCharCode(((code - 97 + shift + 26) % 26) + 97);
-                    }
-                }
-                
-                result += char;
-            }
-            
-            return result;
-        }
-        
-        prevBtn.addEventListener('click', () => {
-            const text = outputText.value || inputText.value;
-            outputText.value = caesarCipher(text, -1);
-            currentShift--;
-            updateShiftDisplay();
-        });
-        
-        nextBtn.addEventListener('click', () => {
-            const text = outputText.value || inputText.value;
-            outputText.value = caesarCipher(text, 1);
-            currentShift++;
-            updateShiftDisplay();
-        });
-    </script>
+        <h3>Getting Started</h3>
+        <p>To customize this page:</p>
+        <ul>
+            <li><a href="https://garrysblog.github.io/rgb565-converter.html">Image to RGB565 Array Converter for Arduino</a></li>
+            <li>Modify the styles in the CSS section</li>
+            <li>Create additional pages and link to them</li>
+            <li>Add images, videos, or other media</li>
+        </ul>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 My GitHub Pages Site</p>
+    </footer>
 </body>
 </html>
