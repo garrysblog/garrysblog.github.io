@@ -70,6 +70,14 @@
     text-transform: uppercase;
   }
 
+  header p.desc {
+    text-transform: none;
+    text-align: left;
+    letter-spacing: 0.02em;
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -285,9 +293,9 @@
 <header>
   <h1>Polygon <span>inside</span> a Circle</h1>
   <p>Inscribed polygon calculator</p>
-  <p>This tool calculates the key dimensions of any regular polygon inscribed inside a circle, supporting shapes from 3 sides (triangle) up to 50 sides. Enter either the circle's diameter or the polygon's side length and the other is calculated automatically.</p>
-  <p>For a given number of sides, the tool displays the side length, circle diameter, perimeter, and interior corner angle. For polygons with an even number of sides it also calculates the flat-to-flat distance between opposing parallel sides, while for odd-sided polygons it calculates the distance from the midpoint of a side to the opposite vertex.</p>
-  <p>A scaled diagram updates in real time to illustrate the polygon inside its circle with the key measurement highlighted.</p>
+  <p class="desc">This tool calculates the key dimensions of any regular polygon inscribed inside a circle, supporting shapes from 3 sides (triangle) up to 50 sides. Enter either the circle's diameter or the polygon's side length and the other is calculated automatically.</p>
+  <p class="desc">For a given number of sides, the tool displays the side length, circle diameter, perimeter, and interior corner angle. For polygons with an even number of sides it also calculates the flat-to-flat distance between opposing parallel sides, while for odd-sided polygons it calculates the distance from the midpoint of a side to the opposite vertex.</p>
+  <p class="desc">A scaled diagram updates in real time to illustrate the polygon inside its circle with the key measurement highlighted.</p>
 </header>
 
 <div class="card">
