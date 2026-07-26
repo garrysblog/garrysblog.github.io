@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>THE HOLLOW KEEP — a text adventure</title>
+<style>
+  :root{
+    --amber:#ffb000;
+    --amber-dim:#c98600;
+    --amber-bright:#ffd166;
+    --bg:#0b0704;
+    --bg2:#140d06;
+    --glass:#1c1208;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+    background:radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 75%);
+    font-family:'Courier New', Courier, monospace;
+    color:var(--amber);
+  }
+  #crt{
+    position:relative;
+    max-width:900px;
+    margin:24px auto;
+    height:calc(100vh - 48px);
+    min-height:520px;
+    background:#0d0904;
+    border:10px solid #1a120a;
+    border-radius:18px;
+    box-shadow:
+      0 0 0 2px #000,
+      0 0 40px rgba(255,176,0,0.15),
+      inset 0 0 80px rgba(0,0,0,0.8);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  #crt::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,176,0,0.04) 0px,
+      rgba(255,176,0,0.04) 1px,
+      transparent 2px,
+      transparent 3px
+    );
+    mix-blend-mode:overlay;
+    z-index:5;
+  }
+  #crt::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%);
+    z-index:6;
+  }
+  header{
+    flex:0 0 auto;
+    padding:14px 22px 10px;
+    border-bottom:1px solid rgba(255,176,0,0.25);
+    text-shadow:0 0 6px rgba(255,176,0,0.6);
+  }
+  header h1{
+    margin:0;
+    font-size:1.15rem;
+    letter-spacing:3px;
+    font-weight:normal;
+    color:var(--amber-bright);
+  }
+  header .sub{
+    font-size:0.72rem;
+    color:var(--amber-dim);
+    letter-spacing:1px;
+    margin-top:4px;
+  }
+  #screen{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:16px 22px;
+    font-size:0.92rem;
+    line-height:1.55;
+    text-shadow:0 0 5px rgba(255,176,0,0.45);
+    white-space:pre-wrap;
+    scrollbar-width:thin;
+    scrollbar-color:var(--amber-dim) transparent;
+  }
+  #screen::-webkit-scrollbar{width:8px;}
+  #screen::-webkit-scrollbar-thumb{background:var(--amber-dim); border-radius:4px;}
+  .room-name{color:var(--amber-bright); font-weight:bold; letter-spacing:1px;}
+  .cmd-echo{color:#7a5200; }
+  .cmd-echo::before{content:"> ";}
+  .sys{color:#8a6a2f; font-style:italic;}
+  .good{color:#ffe08a;}
+  .bad{color:#ff6b4a;}
+  form#inputRow{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    border-top:1px solid rgba(255,176,0,0.25);
+    padding:10px 22px;
+    background:rgba(255,176,0,0.02);
+  }
+  form#inputRow .prompt{
+    margin-right:8px;
+    color:var(--amber-bright);
+  }
+  #cmdInput{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--amber-bright);
+    font-family:inherit;
+    font-size:0.95rem;
+    text-shadow:0 0 5px rgba(255,176,0,0.6);
+    caret-color:var(--amber-bright);
+  }
+  #cmdInput::placeholder{color:#5a3f18;}
+  .hint-bar{
+    flex:0 0 auto;
+    padding:6px 22px 12px;
+    font-size:0.68rem;
+    color:#7a5a26;
+    letter-spacing:0.5px;
+  }
+  @media (max-width:560px){
+    #crt{margin:8px; height:calc(100vh - 16px); border-width:6px;}
+    header h1{font-size:0.95rem; letter-spacing:1.5px;}
+    #screen{font-size:0.85rem; padding:12px 14px;}
+    form#inputRow{padding:8px 14px;}
+    .hint-bar{padding:6px 14px 10px;}
+  }
+</style>
+</head>
+<body>
+<div id="crt">
+  <header>
+    <h1>THE HOLLOW KEEP</h1>
+    <div class="sub">a text adventure in ten chambers</div>
+  </header>
+  <div id="screen"></div>
+  <form id="inputRow">
+    <span class="prompt">&gt;</span>
+    <input id="cmdInput" type="text" autocomplete="off" autofocus placeholder="type a command… (try: help)">
+  </form>
+  <div class="hint-bar">go [dir] · look · take/drop [item] · inventory · examine [thing] · light lamp · use [item] · help</div>
+</div>
+
+<script>
+(function(){
+  const screen = document.getElementById('screen');
+  const input = document.getElementById('cmdInput');
+  const form = document.getElementById('inputRow');
+
+  function print(text, cls){
+    const div = document.createElement('div');
+    if(cls) div.className = cls;
+    div.textContent = text;
+    screen.appendChild(div);
+    screen.scrollTop = screen.scrollHeight;
+  }
+  function printRaw(html, cls){
+    const div = document.createElement('div');
+    if(cls) div.className = cls;
+    div.innerHTML = html;
+    screen.appendChild(div);
+    screen.scrollTop = screen.scrollHeight;
+  }
+  function blank(){ print(""); }
+
+  // ---------- World data ----------
+  const rooms = {
+    clearing: {
+      name: "Rocky Clearing",
+      desc: "Mist clings to a ring of broken standing stones. A weather-beaten door is set into the hillside to the north, half-swallowed by ivy.",
+      exits: { north: "foyer" },
+      items: []
+    },
+    foyer: {
+      name: "Entry Foyer",
+      desc: "A cold stone foyer. Dust sheets cover the furniture like sleeping ghosts. Doorways lead off in several directions, and a narrow stair climbs into shadow to the north.",
+      exits: { south: "clearing", east: "library", west: "garden", north: "kitchen" },
+      items: []
+    },
+    library: {
+      name: "Library",
+      desc: "Shelves of rotten books lean against each other for support. One volume, bound in green leather, looks untouched by time.",
+      exits: { west: "foyer" },
+      items: ["book"]
+    },
+    kitchen: {
+      name: "Kitchen",
+      desc: "A vast hearth, cold for a hundred years. Pots hang from hooks, swaying though there is no draft. A stairway drops down into darkness.",
+      exits: { south: "foyer", down: "cellar" },
+      items: ["key", "lantern"]
+    },
+    garden: {
+      name: "Overgrown Garden",
+      desc: "Thorned roses have reclaimed the courtyard entirely. A cracked stone tower rises to the sky, its door hanging open above a spiral stair.",
+      exits: { east: "foyer", up: "tower" },
+      items: ["flower"]
+    },
+    tower: {
+      name: "Tower Top",
+      desc: "Wind screams around a crumbling parapet. From here you can see the whole Keep laid out below you — and something glints in the moat far to the north.",
+      exits: { down: "garden" },
+      items: []
+    },
+    cellar: {
+      name: "Cellar",
+      desc: "A low, damp cellar thick with cobwebs. Passages lead off into the dark — you'll need light to see where.",
+      exits: { up: "kitchen", east: "armory", down: "dungeon" },
+      items: [],
+      dark: true
+    },
+    armory: {
+      name: "Armory",
+      desc: "Rusted racks that once held weapons stand mostly empty. One blade, untouched by rust, still rests in its bracket.",
+      exits: { west: "cellar" },
+      items: ["sword"]
+    },
+    dungeon: {
+      name: "Dungeon Passage",
+      desc: "Chains hang from the walls of a narrow passage. A heavy iron door to the north is sealed with an old lock.",
+      exits: { up: "cellar", north: "vault" },
+      items: [],
+      locked: true
+    },
+    vault: {
+      name: "Treasure Vault",
+      desc: "Gold coins spill across the floor of a small vault, and atop the pile rests a golden idol, ancient and gleaming. You have found the heart of the Hollow Keep.",
+      exits: { south: "dungeon" },
+      items: ["idol"],
+      guarded: true
+    }
+  };
+
+  const itemDefs = {
+    book:    { name:"green leather book",   desc:"A hand-bound book. Its pages are brittle but the ink is still dark.", take:true,
+      onRead: "The book reads: 'Where the fire once burned, the warder left his key. Carry a flame into the dark below, and go armed before the iron door.'" },
+    key:     { name:"rusty iron key",       desc:"An old iron key, red with rust but still solid.", take:true },
+    lantern: { name:"brass lantern",        desc:"A brass lantern with a dry wick. It could be lit if it had fuel — luckily, it seems to hold just enough oil.", take:true },
+    flower:  { name:"withered rose",        desc:"A single black rose, strangely cold to the touch.", take:true },
+    sword:   { name:"ancient sword",        desc:"A short sword, its edge still keen despite the years.", take:true },
+    idol:    { name:"golden idol",          desc:"A heavy golden idol shaped like a coiled serpent. This is what you came for.", take:true }
+  };
+
+  const state = {
+    room: "clearing",
+    inventory: [],
+    lanternLit: false,
+    won: false,
+    visited: new Set()
+  };
+
+  // ---------- Helpers ----------
+  function room(){ return rooms[state.room]; }
+
+  function listItems(ids){
+    return ids.map(id => itemDefs[id].name).join(", ");
+  }
+
+  function describeRoom(force){
+    const r = room();
+    if(r.dark && !state.lanternLit){
+      print(r.name, "room-name");
+      print("It is pitch black. You can't see a thing down here without a light.");
+      return;
+    }
+    print(r.name, "room-name");
+    print(r.desc);
+    if(r.items.length){
+      print("You can see: " + listItems(r.items) + ".");
+    }
+    const dirs = Object.keys(r.exits);
+    print("Exits: " + dirs.join(", ") + ".");
+    state.visited.add(state.room);
+  }
+
+  const dirWords = {
+    n:"north", north:"north", s:"south", south:"south",
+    e:"east", east:"east", w:"west", west:"west",
+    u:"up", up:"up", d:"down", down:"down"
+  };
+
+  function tryMove(dir){
+    const r = room();
+    if(r.dark && !state.lanternLit && state.room === "cellar"){
+      print("You grope through the blackness but can't find your way. You need a light.", "bad");
+      return;
+    }
+    const dest = r.exits[dir];
+    if(!dest){
+      print("You can't go that way.", "bad");
+      return;
+    }
+    if(dest === "dungeon" && r.locked === undefined){} // n/a, locked checks below at target
+    const target = rooms[dest];
+    if(target.locked){
+      if(state.inventory.includes("key")){
+        target.locked = false;
+        print("You fit the rusty key into the iron door. With a groan, it unlocks.", "good");
+      } else {
+        print("The way down is barred by a heavy locked door. You'll need a key.", "bad");
+        return;
+      }
+    }
+    if(target.guarded){
+      if(!state.inventory.includes("sword")){
+        print("A skeletal guardian rises from the coins and bars your way, its bony hand outstretched. You have nothing to defend yourself with — you retreat.", "bad");
+        return;
+      } else {
+        print("The skeletal guardian lunges — you meet it with your blade, and it crumbles to dust and silence.", "good");
+        target.guarded = false;
+      }
+    }
+    state.room = dest;
+    blank();
+    describeRoom();
+    if(dest === "vault"){
+      print("");
+      print("*** You have found the golden idol of the Hollow Keep! ***", "good");
+      print("Type 'take idol' to claim your prize and finish the tale.", "good");
+    }
+  }
+
+  function takeItem(name){
+    const r = room();
+    if(r.dark && !state.lanternLit){ print("It's too dark to find anything.", "bad"); return; }
+    const id = resolveItem(name, r.items);
+    if(!id){ print("You don't see that here.", "bad"); return; }
+    r.items = r.items.filter(i => i !== id);
+    state.inventory.push(id);
+    print("You take the " + itemDefs[id].name + ".", "good");
+    if(id === "idol"){
+      finishGame();
+    }
+  }
+
+  function dropItem(name){
+    const id = resolveItem(name, state.inventory);
+    if(!id){ print("You aren't carrying that.", "bad"); return; }
+    state.inventory = state.inventory.filter(i => i !== id);
+    room().items.push(id);
+    print("You drop the " + itemDefs[id].name + ".");
+  }
+
+  function resolveItem(name, pool){
+    name = name.toLowerCase();
+    return pool.find(id => itemDefs[id].name.toLowerCase().includes(name) || id === name);
+  }
+
+  function examine(name){
+    if(!name){ print("Examine what?", "bad"); return; }
+    const id = resolveItem(name, [...state.inventory, ...room().items]);
+    if(!id){ print("You don't see that here.", "bad"); return; }
+    print(itemDefs[id].desc);
+  }
+
+  function inventory(){
+    if(state.inventory.length === 0){
+      print("You are carrying nothing.");
+    } else {
+      print("You are carrying: " + listItems(state.inventory) + ".");
+    }
+  }
+
+  function lightLantern(){
+    if(!state.inventory.includes("lantern")){
+      print("You don't have a lantern to light.", "bad");
+      return;
+    }
+    if(state.lanternLit){
+      print("The lantern is already burning.");
+      return;
+    }
+    state.lanternLit = true;
+    print("You strike a spark and the lantern catches. Warm light pushes back the dark.", "good");
+    if(state.room === "cellar"){ blank(); describeRoom(); }
+  }
+
+  function readItem(name){
+    const id = resolveItem(name, state.inventory);
+    if(!id || !itemDefs[id].onRead){ print("There's nothing to read there.", "bad"); return; }
+    print(itemDefs[id].onRead, "good");
+  }
+
+  function finishGame(){
+    state.won = true;
+    blank();
+    print("You tuck the golden idol under your arm and feel the Keep's long silence finally break.", "good");
+    print("");
+    printRaw("<b>*** YOU HAVE WON ***</b>", "good");
+    print("Thanks for playing THE HOLLOW KEEP.");
+    print("(Type 'restart' to play again.)");
+  }
+
+  function restart(){
+    state.room = "clearing";
+    state.inventory = [];
+    state.lanternLit = false;
+    state.won = false;
+    state.visited = new Set();
+    rooms.dungeon.locked = true;
+    rooms.vault.guarded = true;
+    rooms.library.items = ["book"];
+    rooms.kitchen.items = ["key","lantern"];
+    rooms.garden.items = ["flower"];
+    rooms.armory.items = ["sword"];
+    rooms.vault.items = ["idol"];
+    rooms.clearing.items = [];
+    rooms.foyer.items = [];
+    rooms.tower.items = [];
+    rooms.cellar.items = [];
+    screen.innerHTML = "";
+    intro();
+  }
+
+  function help(){
+    print("Commands:", "sys");
+    print("  go [direction] / north,south,east,west,up,down (or n,s,e,w,u,d)", "sys");
+    print("  look                 — describe your surroundings again", "sys");
+    print("  take [item] / drop [item]", "sys");
+    print("  inventory (or i)     — list what you're carrying", "sys");
+    print("  examine [thing]      — look closely at an item", "sys");
+    print("  read [item]          — read something", "sys");
+    print("  light lantern        — light your lantern in the dark", "sys");
+    print("  restart               — start the game over", "sys");
+  }
+
+  // ---------- Parser ----------
+  function handle(raw){
+    const cmd = raw.trim().toLowerCase();
+    if(!cmd) return;
+    print(cmd, "cmd-echo");
+
+    if(state.won && cmd !== "restart"){
+      print("The tale is finished. Type 'restart' to play again.", "sys");
+      return;
+    }
+
+    const words = cmd.split(/\s+/);
+    let verb = words[0];
+    let rest = words.slice(1).join(" ");
+
+    if(dirWords[verb]){
+      tryMove(dirWords[verb]);
+      return;
+    }
+
+    switch(verb){
+      case "go": {
+        const d = dirWords[rest] || rest;
+        if(dirWords[d]) tryMove(dirWords[d]); else print("Go where?", "bad");
+        break;
+      }
+      case "look": case "l":
+        describeRoom();
+        break;
+      case "take": case "get":
+        rest ? takeItem(rest) : print("Take what?", "bad");
+        break;
+      case "drop":
+        rest ? dropItem(rest) : print("Drop what?", "bad");
+        break;
+      case "inventory": case "i": case "inv":
+        inventory();
+        break;
+      case "examine": case "x": case "inspect":
+        examine(rest);
+        break;
+      case "read":
+        rest ? readItem(rest) : print("Read what?", "bad");
+        break;
+      case "light":
+        if(rest.includes("lantern") || rest.includes("lamp")) lightLantern();
+        else print("Light what?", "bad");
+        break;
+      case "use":
+        if(rest.includes("key")) print("Try using the key on a locked door by walking toward it.", "sys");
+        else if(rest.includes("lantern") || rest.includes("lamp")) lightLantern();
+        else print("Not sure how to use that here.", "bad");
+        break;
+      case "help": case "?":
+        help();
+        break;
+      case "restart":
+        restart();
+        break;
+      default:
+        print("I don't understand that. Type 'help' for a list of commands.", "bad");
+    }
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const val = input.value;
+    input.value = "";
+    handle(val);
+  });
+
+  function intro(){
+    print("THE HOLLOW KEEP", "room-name");
+    print("A ruined keep waits beyond the mist. Somewhere within, an old treasure still gleams.");
+    print("Type 'help' any time you're stuck.");
+    blank();
+    describeRoom();
+  }
+
+  intro();
+})();
+</script>
+</body>
+</html>
